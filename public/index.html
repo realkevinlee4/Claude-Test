@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily News Aggregator - Reports</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .status-bar {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .tab {
+            padding: 1rem 2rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #6b7280;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            color: #667eea;
+            background: #f9fafb;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .report-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .report-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+
+        .report-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: #1f2937;
+        }
+
+        .report-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 0.5rem;
+        }
+
+        .report-type {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .report-type.hourly { background: #dbeafe; color: #1e40af; }
+        .report-type.overnight { background: #fef3c7; color: #92400e; }
+        .report-type.full { background: #dcfce7; color: #166534; }
+
+        .report-viewer {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .report-viewer h1 {
+            color: #1f2937;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .report-viewer h2 {
+            color: #374151;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .report-viewer h3 {
+            color: #4b5563;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .report-viewer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .report-viewer a:hover {
+            text-decoration: underline;
+        }
+
+        .report-viewer p {
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .report-viewer hr {
+            border: none;
+            border-top: 2px solid #e5e7eb;
+            margin: 2rem 0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            color: #6b7280;
+        }
+
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fef2f2;
+            border: 1px solid #fca5a5;
+            color: #991b1b;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem;
+            color: #6b7280;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .back-button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            transition: background 0.2s;
+        }
+
+        .back-button:hover {
+            background: #5568d3;
+        }
+
+        .refresh-button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            margin-left: auto;
+        }
+
+        .refresh-button:hover {
+            background: #059669;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📰 Daily News Aggregator</h1>
+        <p>Automated news tracking across 11 categories</p>
+    </div>
+
+    <div class="status-bar">
+        <div class="status-item">
+            <div class="status-indicator"></div>
+            <span>System Running</span>
+        </div>
+        <div class="status-item">
+            <span id="reportCount">Loading...</span>
+        </div>
+        <div class="status-item">
+            <span id="lastUpdate">Last update: Checking...</span>
+        </div>
+        <button class="refresh-button" onclick="loadReports()">🔄 Refresh</button>
+    </div>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('all')">All Reports</button>
+            <button class="tab" onclick="switchTab('hourly')">Hourly Updates</button>
+            <button class="tab" onclick="switchTab('overnight')">Overnight Summaries</button>
+            <button class="tab" onclick="switchTab('full')">Full Reports</button>
+        </div>
+
+        <div id="all" class="tab-content active">
+            <div class="reports-grid" id="allReports"></div>
+        </div>
+
+        <div id="hourly" class="tab-content">
+            <div class="reports-grid" id="hourlyReports"></div>
+        </div>
+
+        <div id="overnight" class="tab-content">
+            <div class="reports-grid" id="overnightReports"></div>
+        </div>
+
+        <div id="full" class="tab-content">
+            <div class="reports-grid" id="fullReports"></div>
+        </div>
+
+        <div id="viewer" class="tab-content">
+            <button class="back-button" onclick="closeViewer()">← Back to Reports</button>
+            <div class="report-viewer" id="reportContent"></div>
+        </div>
+    </div>
+
+    <script>
+        let allReportsData = [];
+
+        // Switch tabs
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // Load reports
+        async function loadReports() {
+            try {
+                const response = await fetch('/api/reports');
+                const data = await response.json();
+                allReportsData = data.reports;
+
+                document.getElementById('reportCount').textContent = `${data.reports.length} reports`;
+
+                if (data.reports.length > 0) {
+                    const latest = new Date(data.reports[0].modified);
+                    document.getElementById('lastUpdate').textContent =
+                        `Last update: ${latest.toLocaleString()}`;
+                }
+
+                renderReports('allReports', data.reports);
+                renderReports('hourlyReports', data.reports.filter(r => r.type === 'hourly'));
+                renderReports('overnightReports', data.reports.filter(r => r.type === 'overnight'));
+                renderReports('fullReports', data.reports.filter(r => r.type === 'full'));
+            } catch (error) {
+                console.error('Error loading reports:', error);
+                showError('Failed to load reports');
+            }
+        }
+
+        // Render reports
+        function renderReports(containerId, reports) {
+            const container = document.getElementById(containerId);
+
+            if (reports.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No reports yet</h3>
+                        <p>Reports will appear here once the system generates them.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = reports.map(report => `
+                <div class="report-card" onclick="viewReport('${report.path}')">
+                    <span class="report-type ${report.type}">${report.type}</span>
+                    <h3>${report.name}</h3>
+                    <div class="report-meta">
+                        <span>📅 ${new Date(report.modified).toLocaleDateString()}</span>
+                        <span>🕐 ${new Date(report.modified).toLocaleTimeString()}</span>
+                        <span>📄 ${formatBytes(report.size)}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // View report
+        async function viewReport(filename) {
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById('viewer').classList.add('active');
+
+            document.getElementById('reportContent').innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading report...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`/api/reports/${filename}`);
+                const data = await response.json();
+                document.getElementById('reportContent').innerHTML = data.html;
+            } catch (error) {
+                console.error('Error loading report:', error);
+                document.getElementById('reportContent').innerHTML = `
+                    <div class="error">Failed to load report</div>
+                `;
+            }
+        }
+
+        // Close viewer
+        function closeViewer() {
+            document.getElementById('viewer').classList.remove('active');
+            document.getElementById('all').classList.add('active');
+        }
+
+        // Format bytes
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        // Show error
+        function showError(message) {
+            document.getElementById('allReports').innerHTML = `
+                <div class="error">${message}</div>
+            `;
+        }
+
+        // Auto-refresh every 5 minutes
+        setInterval(loadReports, 5 * 60 * 1000);
+
+        // Initial load
+        loadReports();
+    </script>
+</body>
+</html>

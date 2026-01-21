@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import Scheduler from './services/scheduler';
+import { startReportServer } from './reports/server';
 import config from './config/config';
 
 const scheduler = new Scheduler();
@@ -20,6 +21,7 @@ USAGE:
 
 COMMANDS:
   start              Start the automated scheduler (default)
+  web                Start scheduler with web interface (port 3000)
   hourly             Run a single hourly update
   overnight          Generate overnight summary
   cleanup            Clean old articles and reports
@@ -58,6 +60,7 @@ REPORTS:
 
 EXAMPLES:
   npm start                    # Start the scheduler
+  npm start web                # Start with web interface
   npm start hourly             # Run hourly update once
   npm start overnight          # Generate overnight summary
   npm start cleanup            # Clean old data
@@ -127,6 +130,12 @@ Timezone:              ${config.timezone}
     case '-h':
       printHelp();
       process.exit(0);
+      break;
+
+    case 'web':
+      // Start scheduler with web interface
+      scheduler.start();
+      startReportServer();
       break;
 
     case 'start':

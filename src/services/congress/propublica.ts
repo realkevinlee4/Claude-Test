@@ -22,8 +22,8 @@ export class CongressService {
   }
 
   async getRecentBills(chamber: 'house' | 'senate'): Promise<NewsArticle[]> {
-    if (!this.apiKey) {
-      console.warn('ProPublica API key not configured, skipping Congress data');
+    if (!this.apiKey || this.apiKey === 'PROPUBLICA_API_KEY' || this.apiKey === 'your_propublica_key_here') {
+      // Silent skip - API key is placeholder
       return [];
     }
 
@@ -60,7 +60,7 @@ export class CongressService {
   }
 
   async getRecentVotes(chamber: 'house' | 'senate'): Promise<NewsArticle[]> {
-    if (!this.apiKey) {
+    if (!this.apiKey || this.apiKey === 'PROPUBLICA_API_KEY' || this.apiKey === 'your_propublica_key_here') {
       return [];
     }
 
@@ -107,7 +107,7 @@ export class CongressService {
   }
 
   async searchBills(query: string): Promise<CongressBill[]> {
-    if (!this.apiKey) {
+    if (!this.apiKey || this.apiKey === 'PROPUBLICA_API_KEY' || this.apiKey === 'your_propublica_key_here') {
       return [];
     }
 
