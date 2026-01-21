@@ -1,0 +1,33 @@
+{
+  "name": "daily-news-aggregator",
+  "version": "1.0.0",
+  "description": "Automated daily news aggregation and reporting system",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "watch": "tsc --watch"
+  },
+  "keywords": ["news", "aggregator", "reporting", "automation"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "node-cron": "^3.0.3",
+    "axios": "^1.6.5",
+    "dotenv": "^16.3.1",
+    "better-sqlite3": "^9.2.2",
+    "marked": "^11.1.1",
+    "date-fns": "^3.0.6",
+    "date-fns-tz": "^3.2.0",
+    "cheerio": "^1.0.0-rc.12",
+    "rss-parser": "^3.13.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "@types/better-sqlite3": "^7.6.8",
+    "@types/node-cron": "^3.0.11",
+    "typescript": "^5.3.3",
+    "ts-node": "^10.9.2"
+  }
+}
