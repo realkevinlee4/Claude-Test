@@ -1,0 +1,94 @@
+name: Manual News Update
+
+# This workflow can only be triggered manually
+on:
+  workflow_dispatch:
+    inputs:
+      command:
+        description: 'Select command to run'
+        required: true
+        default: 'hourly'
+        type: choice
+        options:
+          - hourly
+          - overnight
+          - cleanup
+          - full-report
+
+permissions:
+  contents: write
+
+jobs:
+  run-command:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build TypeScript
+        run: npm run build
+
+      - name: Create .env file
+        run: |
+          cat > .env << EOF
+          NEWSAPI_KEY=${{ secrets.NEWSAPI_KEY }}
+          PROPUBLICA_API_KEY=${{ secrets.PROPUBLICA_API_KEY }}
+          TWITTER_BEARER_TOKEN=${{ secrets.TWITTER_BEARER_TOKEN }}
+          REDDIT_CLIENT_ID=${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET=${{ secrets.REDDIT_CLIENT_SECRET }}
+          TZ=America/New_York
+          REPORTS_DIR=./reports
+          DATABASE_PATH=./data/news.db
+          EOF
+
+      - name: Create directories
+        run: mkdir -p reports data
+
+      - name: Run ${{ github.event.inputs.command }}
+        run: npm start ${{ github.event.inputs.command }}
+
+      - name: Commit and push
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          git add reports/ data/ || true
+
+          if ! git diff --staged --quiet; then
+            TIMESTAMP=$(TZ=America/New_York date '+%Y-%m-%d %H:%M EST')
+            git commit -m "📰 Manual news update (${{ github.event.inputs.command }}) - $TIMESTAMP"
+            git push
+          fi
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-${{ github.event.inputs.command }}-${{ github.run_number }}
+          path: |
+            reports/
+            data/
+          retention-days: 30
+
+      - name: Job Summary
+        run: |
+          echo "## ✅ Manual News Update Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Command:** ${{ github.event.inputs.command }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Time:** $(TZ=America/New_York date '+%Y-%m-%d %H:%M:%S EST')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -d "reports" ] && [ "$(ls -A reports 2>/dev/null)" ]; then
+            echo "### 📄 Generated Reports:" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            ls -lh reports/ | tail -n 10 >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          fi

@@ -2,6 +2,36 @@
 
 An automated news aggregation and reporting system that collects breaking news from traditional media, social media, and government sources across multiple topics.
 
+## 🚀 Quick Start
+
+**Choose your deployment method:**
+
+### Option 1: GitHub Actions (Recommended - No Server Needed!)
+Run automatically on GitHub's infrastructure - completely free!
+
+```bash
+1. Add API keys to GitHub Secrets (2 minutes)
+2. Enable GitHub Actions
+3. Run your first update
+```
+
+👉 **[GitHub Actions Quick Start Guide](QUICKSTART_GITHUB.md)** (2 minutes)
+📖 **[Complete GitHub Actions Setup](GITHUB_ACTIONS_SETUP.md)** (detailed guide)
+
+### Option 2: Local/Server Installation
+Run on your own machine or server.
+
+```bash
+1. Clone this repository
+2. npm install && npm run build
+3. Add API keys to .env
+4. npm start
+```
+
+👉 **[Local Setup Guide](SETUP_GUIDE.md)** (10 minutes)
+
+---
+
 ## Features
 
 ### News Categories Tracked
