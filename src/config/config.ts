@@ -5,12 +5,12 @@ dotenv.config();
 
 export const config = {
   // API Keys
-  newsApiKey: process.env.NEWSAPI_KEY || '',
-  twitterBearerToken: process.env.TWITTER_BEARER_TOKEN || '',
+  newsApiKey: process.env.NEWSAPI_KEY || '005317b8482d4dc789cb30df41d1a10c',
+  twitterBearerToken: process.env.TWITTER_BEARER_TOKEN || 'AAAAAAAAAAAAAAAAAAAAAPqo7AEAAAAAQ4twPZJbahCvXrLP5r%2BOnqLR0ls%3DQahn7BlQJhVyiMjwtIOYhrYf2IGKkGlrJ4GUrzd8ZDiTrjziFS',
   redditClientId: process.env.REDDIT_CLIENT_ID || '',
   redditClientSecret: process.env.REDDIT_CLIENT_SECRET || '',
   redditUserAgent: process.env.REDDIT_USER_AGENT || 'DailyNewsAggregator/1.0',
-  propublicaApiKey: process.env.PROPUBLICA_API_KEY || '',
+  propublicaApiKey: process.env.PROPUBLICA_API_KEY || 'PROPUBLICA_API_KEY',
 
   // Paths
   reportsDir: process.env.REPORTS_DIR || path.join(process.cwd(), 'reports'),
