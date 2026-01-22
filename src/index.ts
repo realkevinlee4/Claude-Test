@@ -2,6 +2,8 @@
 
 import Scheduler from './services/scheduler';
 import { startReportServer } from './reports/server';
+import EmailService from './services/email';
+import NewsDatabase from './models/database';
 import config from './config/config';
 
 const scheduler = new Scheduler();

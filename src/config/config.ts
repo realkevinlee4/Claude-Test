@@ -46,6 +46,14 @@ export const config = {
     newsApiDelay: 1000, // 1 second between requests
     twitterDelay: 2000, // 2 seconds between requests
     propublicaDelay: 1000 // 1 second between requests
+  },
+
+  // Email Settings
+  email: {
+    enabled: process.env.EMAIL_ENABLED === 'true',
+    recipients: (process.env.EMAIL_RECIPIENTS || '').split(',').filter(Boolean),
+    sendHourlyUpdates: process.env.SEND_HOURLY_EMAILS === 'true',
+    sendOvernightSummary: process.env.SEND_OVERNIGHT_EMAIL !== 'false' // Default true
   }
 };
 

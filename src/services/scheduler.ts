@@ -3,12 +3,14 @@ import { formatInTimeZone } from 'date-fns-tz';
 import NewsDatabase from '../models/database';
 import NewsAggregator from './news/aggregator';
 import ReportGenerator from '../reports/generator';
+import EmailService from './email';
 import config from '../config/config';
 
 export class Scheduler {
   private db: NewsDatabase;
   private aggregator: NewsAggregator;
   private reportGenerator: ReportGenerator;
+  private emailService: EmailService;
   private hourlyTask?: cron.ScheduledTask;
   private overnightTask?: cron.ScheduledTask;
   private cleanupTask?: cron.ScheduledTask;
@@ -17,6 +19,7 @@ export class Scheduler {
     this.db = new NewsDatabase();
     this.aggregator = new NewsAggregator(this.db);
     this.reportGenerator = new ReportGenerator(this.db);
+    this.emailService = new EmailService(this.db);
   }
 
   private getCurrentTime(): string {
@@ -38,6 +41,15 @@ export class Scheduler {
       console.log('\n📝 Generating hourly report...');
       const reportPath = this.reportGenerator.generateHourlyReport();
       console.log(`✅ Report saved: ${reportPath}`);
+
+      // Send email if configured and enabled
+      if (config.email.enabled && config.email.sendHourlyUpdates && config.email.recipients.length > 0) {
+        console.log('\n📧 Sending hourly email update...');
+        const emailSent = await this.emailService.sendHourlyUpdate(config.email.recipients);
+        if (emailSent) {
+          console.log(`✅ Email sent to ${config.email.recipients.length} recipient(s)`);
+        }
+      }
 
       console.log('\n' + '='.repeat(60));
       console.log(`Hourly Update Completed: ${this.getCurrentTime()}`);
@@ -67,6 +79,15 @@ export class Scheduler {
       console.log('\n📊 Generating full daily report...');
       const fullReportPath = this.reportGenerator.generateFullReport();
       console.log(`✅ Full report saved: ${fullReportPath}`);
+
+      // Send email if configured and enabled
+      if (config.email.enabled && config.email.sendOvernightSummary && config.email.recipients.length > 0) {
+        console.log('\n📧 Sending overnight summary email...');
+        const emailSent = await this.emailService.sendOvernightSummary(config.email.recipients);
+        if (emailSent) {
+          console.log(`✅ Email sent to ${config.email.recipients.length} recipient(s)`);
+        }
+      }
 
       console.log('\n' + '='.repeat(60));
       console.log(`Overnight Summary Completed: ${this.getCurrentTime()}`);
